@@ -5,10 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 import { QueryProvider } from '@/providers/query-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
+import { Sidebar } from '@/components/layout/sidebar';
+import { Header } from '@/components/layout/header';
+import { MobileNav } from '@/components/layout/mobile-nav';
 
 /**
  * Protected layout for the member area.
- * Wraps all member pages with auth check, QueryProvider, and ThemeProvider.
+ * Wraps all member pages with auth check, navigation, QueryProvider, and ThemeProvider.
  */
 export default function MemberLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -44,7 +47,27 @@ export default function MemberLayout({ children }: { children: ReactNode }) {
 
   return (
     <ThemeProvider>
-      <QueryProvider>{children}</QueryProvider>
+      <QueryProvider>
+        <div className="flex min-h-screen bg-[var(--color-bg-dark)]">
+          {/* Sidebar — hidden on mobile */}
+          <div className="hidden lg:block">
+            <Sidebar />
+          </div>
+
+          {/* Main content */}
+          <div className="flex flex-1 flex-col">
+            <Header />
+            <main className="flex-1 overflow-y-auto px-4 pb-20 pt-4 lg:px-8 lg:pb-8">
+              {children}
+            </main>
+          </div>
+
+          {/* Mobile bottom nav — visible only on mobile */}
+          <div className="lg:hidden">
+            <MobileNav />
+          </div>
+        </div>
+      </QueryProvider>
     </ThemeProvider>
   );
 }

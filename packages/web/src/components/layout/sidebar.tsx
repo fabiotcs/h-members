@@ -25,13 +25,19 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Home', href: '/', icon: Home },
-  { label: 'Meus Cursos', href: '/courses', icon: BookOpen },
-  { label: 'Alunos', href: '/admin/students', icon: Users, adminOnly: true },
+  { label: 'Home', href: '/home', icon: Home },
+  { label: 'Meus Cursos', href: '/home', icon: BookOpen },
   {
-    label: 'Analytics',
-    href: '/admin/analytics',
+    label: 'Painel Admin',
+    href: '/admin',
     icon: BarChart3,
+    adminOnly: true,
+  },
+  { label: 'Usuarios', href: '/admin/users', icon: Users, adminOnly: true },
+  {
+    label: 'Cursos',
+    href: '/admin/courses',
+    icon: BookOpen,
     adminOnly: true,
   },
   {

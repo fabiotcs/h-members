@@ -5,8 +5,8 @@ import { usePathname } from 'next/navigation';
 import { Home, BookOpen, User } from 'lucide-react';
 
 const items = [
-  { label: 'Home', href: '/', icon: Home },
-  { label: 'Cursos', href: '/courses', icon: BookOpen },
+  { label: 'Home', href: '/home', icon: Home },
+  { label: 'Cursos', href: '/home', icon: BookOpen },
   { label: 'Perfil', href: '/profile', icon: User },
 ];
 
