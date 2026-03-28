@@ -20,10 +20,10 @@ import { FormInput } from '@/components/admin/form-field';
 /* ------------------------------------------------------------------ */
 
 interface PlatformSettings {
-  platformName: string;
-  primaryColor: string;
-  logoUrl: string;
-  faviconUrl: string;
+  platform_name: string;
+  primary_color: string;
+  logo_url: string;
+  favicon_url: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -52,10 +52,10 @@ export default function AdminSettingsPage() {
   // Populate form
   useEffect(() => {
     if (settings) {
-      setPlatformName(settings.platformName);
-      setPrimaryColor(settings.primaryColor);
-      setLogoPreview(settings.logoUrl);
-      setFaviconPreview(settings.faviconUrl);
+      setPlatformName(settings.platform_name || '');
+      setPrimaryColor(settings.primary_color || '#6366F1');
+      setLogoPreview(settings.logo_url || '');
+      setFaviconPreview(settings.favicon_url || '');
     }
   }, [settings]);
 
@@ -94,8 +94,8 @@ export default function AdminSettingsPage() {
       // Save settings via bulk update
       const settingsPayload = {
         settings: [
-          { key: 'platformName', value: platformName },
-          { key: 'primaryColor', value: primaryColor },
+          { key: 'platform_name', value: platformName },
+          { key: 'primary_color', value: primaryColor },
         ],
       };
       if (faviconFile) {
