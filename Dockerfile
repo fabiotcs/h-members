@@ -13,7 +13,7 @@ COPY packages/web/package.json ./packages/web/
 COPY packages/shared/package.json ./packages/shared/
 
 # Install all dependencies (including dev for build)
-RUN npm ci --production=false
+RUN npm ci
 
 # ============================================
 # Stage 2: Build
