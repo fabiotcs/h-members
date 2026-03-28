@@ -95,7 +95,7 @@ EXPOSE 80
 VOLUME ["/app/uploads"]
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD wget -qO- http://localhost/api/v1/health || exit 1
+  CMD wget -qO- http://127.0.0.1/api/v1/health || exit 1
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]
