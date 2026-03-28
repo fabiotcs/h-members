@@ -9,6 +9,7 @@ export class AppConfigService {
     return {
       port: this.config.get<number>('PORT', 3001),
       nodeEnv: this.config.get<string>('NODE_ENV', 'development'),
+      appUrl: this.config.get<string>('APP_URL', 'http://localhost'),
       corsOrigin: this.config.get<string>(
         'CORS_ORIGIN',
         'http://localhost:3000',

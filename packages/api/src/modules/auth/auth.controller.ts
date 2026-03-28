@@ -53,9 +53,12 @@ export class AuthController {
 
     const maxAge = this.parseExpiresInToMs(this.appConfig.auth.jwtExpiresIn);
 
+    // secure: true only when APP_URL starts with https
+    const isHttps = this.appConfig.app.appUrl?.startsWith('https') ?? false;
+
     res.cookie('access_token', result.accessToken, {
       httpOnly: true,
-      secure: this.appConfig.app.nodeEnv === 'production',
+      secure: isHttps,
       sameSite: 'lax',
       maxAge,
       path: '/',
@@ -79,9 +82,11 @@ export class AuthController {
 
     await this.authService.logout(user.sessionId);
 
+    const isHttps = this.appConfig.app.appUrl?.startsWith('https') ?? false;
+
     res.clearCookie('access_token', {
       httpOnly: true,
-      secure: this.appConfig.app.nodeEnv === 'production',
+      secure: isHttps,
       sameSite: 'lax',
       path: '/',
     });

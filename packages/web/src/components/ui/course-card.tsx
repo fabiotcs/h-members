@@ -37,14 +37,22 @@ export function CourseCard({
         transition={{ duration: 0.2 }}
         className="relative aspect-[16/9] w-full overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-card)]"
       >
-        {/* Cover image */}
-        <Image
-          src={coverUrl}
-          alt={title}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-110"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-        />
+        {/* Cover image or placeholder */}
+        {coverUrl ? (
+          <Image
+            src={coverUrl}
+            alt={title}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-110"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--color-bg-elevated)] to-[var(--color-bg-surface)]">
+            <span className="text-3xl font-bold text-[var(--color-text-muted)] opacity-30">
+              {title.charAt(0)}
+            </span>
+          </div>
+        )}
 
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
