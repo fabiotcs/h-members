@@ -72,7 +72,7 @@ export default function AdminCoursesPage() {
       if (search) params.set('search', search);
       if (categoryFilter) params.set('categoryId', categoryFilter);
       if (statusFilter) params.set('status', statusFilter);
-      const res = await api.get(`/v1/admin/courses?${params.toString()}`);
+      const res = await api.get(`/v1/courses?${params.toString()}`);
       return res.data;
     },
     placeholderData: (prev) => prev,
@@ -82,7 +82,7 @@ export default function AdminCoursesPage() {
   const { data: categories } = useQuery<Category[]>({
     queryKey: ['admin', 'categories-list'],
     queryFn: async () => {
-      const res = await api.get('/v1/admin/categories');
+      const res = await api.get('/v1/categories');
       return res.data;
     },
   });
@@ -90,7 +90,7 @@ export default function AdminCoursesPage() {
   // Delete course
   const deleteMut = useMutation({
     mutationFn: async (id: number) => {
-      await api.delete(`/v1/admin/courses/${id}`);
+      await api.delete(`/v1/courses/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'courses'] });
@@ -101,7 +101,7 @@ export default function AdminCoursesPage() {
   // Duplicate course
   const duplicateMut = useMutation({
     mutationFn: async (id: number) => {
-      await api.post(`/v1/admin/courses/${id}/duplicate`);
+      await api.post(`/v1/courses/${id}/duplicate`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'courses'] });
@@ -111,7 +111,7 @@ export default function AdminCoursesPage() {
   // Reorder
   const reorderMut = useMutation({
     mutationFn: async ({ id, direction }: { id: number; direction: 'up' | 'down' }) => {
-      await api.patch(`/v1/admin/courses/${id}/reorder`, { direction });
+      await api.patch('/v1/courses/reorder', { courseIds: [id], direction });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'courses'] });

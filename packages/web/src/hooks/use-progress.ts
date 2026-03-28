@@ -25,42 +25,47 @@ interface CourseProgress {
 // ---- API calls ----
 
 async function fetchCourseProgress(courseId: string): Promise<CourseProgress> {
-  const { data } = await api.get(`/v1/courses/${courseId}/progress`);
-  return data.data;
+  const { data } = await api.get(`/v1/progress/course/${courseId}`);
+  return data.data ?? data;
 }
 
 async function fetchLessonProgress(
-  courseId: string,
+  _courseId: string,
   lessonId: string,
 ): Promise<LessonProgress> {
+  // Fetch course-level lesson progress and find the specific lesson
   const { data } = await api.get(
-    `/v1/courses/${courseId}/lessons/${lessonId}/progress`,
+    `/v1/progress/course/${_courseId}/lessons`,
   );
-  return data.data;
+  const lessons = data.data ?? data;
+  const lesson = Array.isArray(lessons)
+    ? lessons.find((l: LessonProgress) => l.lessonId === lessonId)
+    : null;
+  return lesson ?? { lessonId, completed: false, completedAt: null, videoPosition: 0 };
 }
 
 async function saveVideoPosition(
-  courseId: string,
+  _courseId: string,
   lessonId: string,
   position: number,
 ): Promise<void> {
-  await api.put(`/v1/courses/${courseId}/lessons/${lessonId}/progress`, {
-    videoPosition: position,
+  await api.put(`/v1/progress/lesson/${lessonId}/position`, {
+    position,
   });
 }
 
 async function markLessonComplete(
-  courseId: string,
+  _courseId: string,
   lessonId: string,
 ): Promise<void> {
-  await api.post(`/v1/courses/${courseId}/lessons/${lessonId}/complete`);
+  await api.post(`/v1/progress/lesson/${lessonId}/complete`);
 }
 
 async function markLessonIncomplete(
-  courseId: string,
+  _courseId: string,
   lessonId: string,
 ): Promise<void> {
-  await api.post(`/v1/courses/${courseId}/lessons/${lessonId}/incomplete`);
+  await api.delete(`/v1/progress/lesson/${lessonId}/complete`);
 }
 
 // ---- Hooks ----

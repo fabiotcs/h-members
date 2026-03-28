@@ -44,7 +44,7 @@ export default function AdminSettingsPage() {
   const { data: settings, isLoading } = useQuery<PlatformSettings>({
     queryKey: ['admin', 'settings'],
     queryFn: async () => {
-      const res = await api.get('/v1/admin/settings');
+      const res = await api.get('/v1/settings');
       return res.data;
     },
   });
@@ -83,9 +83,30 @@ export default function AdminSettingsPage() {
       formData.append('primaryColor', primaryColor);
       if (logoFile) formData.append('logo', logoFile);
       if (faviconFile) formData.append('favicon', faviconFile);
-      await api.put('/v1/admin/settings', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      // Upload logo separately if provided
+      if (logoFile) {
+        const logoData = new FormData();
+        logoData.append('file', logoFile);
+        await api.post('/v1/upload/logo', logoData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      }
+      // Save settings via bulk update
+      const settingsPayload = {
+        settings: [
+          { key: 'platformName', value: platformName },
+          { key: 'primaryColor', value: primaryColor },
+        ],
+      };
+      if (faviconFile) {
+        // Favicon upload would need a separate endpoint; for now include in settings
+        const favData = new FormData();
+        favData.append('file', faviconFile);
+        await api.post('/v1/upload/logo', favData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      }
+      await api.put('/v1/admin/settings/bulk', settingsPayload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'settings'] });

@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      await api.post('/api/v1/auth/forgot-password', { email });
+      await api.post('/v1/auth/forgot-password', { email });
       setIsSuccess(true);
     } catch (err: any) {
       const message =

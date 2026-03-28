@@ -51,14 +51,20 @@ export function HeroBanner({ courses, autoRotateMs = 6000 }: HeroBannerProps) {
           transition={{ duration: 0.5 }}
           className="absolute inset-0"
         >
-          <Image
-            src={course.coverUrl}
-            alt={course.title}
-            fill
-            className="object-cover"
-            sizes="100vw"
-            priority
-          />
+          {course.coverUrl ? (
+            <Image
+              src={course.coverUrl}
+              alt={course.title}
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--color-bg-elevated)] to-[var(--color-bg-surface)]">
+              <span className="text-6xl font-bold text-[var(--color-text-muted)] opacity-20">{course.title.charAt(0)}</span>
+            </div>
+          )}
 
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-dark)] via-[var(--color-bg-dark)]/40 to-transparent" />

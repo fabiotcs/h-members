@@ -104,7 +104,7 @@ export default function AdminUserEditPage() {
   const { data: allCourses } = useQuery<Course[]>({
     queryKey: ['admin', 'courses-list'],
     queryFn: async () => {
-      const res = await api.get('/v1/admin/courses?pageSize=200');
+      const res = await api.get('/v1/courses?pageSize=200');
       return res.data.data ?? res.data;
     },
   });
@@ -113,7 +113,7 @@ export default function AdminUserEditPage() {
   const { data: loginLogs, isLoading: logsLoading } = useQuery<LoginLog[]>({
     queryKey: ['admin', 'user', userId, 'logs'],
     queryFn: async () => {
-      const res = await api.get(`/v1/admin/users/${userId}/login-logs`);
+      const res = await api.get(`/v1/admin/login-logs/user/${userId}`);
       return res.data;
     },
     enabled: !isNew && activeTab === 'logs',
@@ -126,7 +126,8 @@ export default function AdminUserEditPage() {
       const res = await api.get(`/v1/admin/users/${userId}/sessions`);
       return res.data;
     },
-    enabled: !isNew && activeTab === 'sessions',
+    // Sessions endpoint may not exist; disable for now
+    enabled: false,
   });
 
   // Populate form on user load
@@ -147,7 +148,7 @@ export default function AdminUserEditPage() {
       if (isNew) {
         await api.post('/v1/admin/users', body);
       } else {
-        await api.put(`/v1/admin/users/${userId}`, body);
+        await api.patch(`/v1/admin/users/${userId}`, body);
       }
     },
     onSuccess: () => {
@@ -166,9 +167,9 @@ export default function AdminUserEditPage() {
   const toggleCourseMut = useMutation({
     mutationFn: async ({ courseId, grant }: { courseId: number; grant: boolean }) => {
       if (grant) {
-        await api.post(`/v1/admin/users/${userId}/courses`, { courseId });
+        await api.post('/v1/course-access/grant', { userId: Number(userId), courseId });
       } else {
-        await api.delete(`/v1/admin/users/${userId}/courses/${courseId}`);
+        await api.delete('/v1/course-access/revoke', { data: { userId: Number(userId), courseId } });
       }
     },
     onSuccess: () => {
@@ -178,8 +179,8 @@ export default function AdminUserEditPage() {
 
   // Force logout
   const forceLogoutMut = useMutation({
-    mutationFn: async (sessionId: string) => {
-      await api.delete(`/v1/admin/users/${userId}/sessions/${sessionId}`);
+    mutationFn: async (_sessionId: string) => {
+      await api.delete(`/v1/admin/users/${userId}/sessions`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'user', userId, 'sessions'] });

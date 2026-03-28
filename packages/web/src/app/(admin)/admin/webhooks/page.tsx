@@ -111,7 +111,7 @@ export default function AdminWebhooksPage() {
       if (!data) return;
       const body = { url: data.url, events: data.events, secret: data.secret, active: data.active };
       if (data.id) {
-        await api.put(`/v1/admin/webhooks/${data.id}`, body);
+        await api.patch(`/v1/admin/webhooks/${data.id}`, body);
       } else {
         await api.post('/v1/admin/webhooks', body);
       }

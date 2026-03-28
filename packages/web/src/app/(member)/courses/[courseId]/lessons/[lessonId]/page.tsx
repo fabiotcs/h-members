@@ -67,7 +67,7 @@ async function fetchLesson(
   lessonId: string,
 ): Promise<LessonDetail> {
   const { data } = await api.get(
-    `/v1/courses/${courseId}/lessons/${lessonId}`,
+    `/v1/lessons/${lessonId}`,
   );
   return data.data;
 }

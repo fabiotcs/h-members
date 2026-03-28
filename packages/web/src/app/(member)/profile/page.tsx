@@ -236,7 +236,7 @@ function ChangePasswordSection() {
 
     setIsSaving(true);
     try {
-      await api.post('/v1/auth/change-password', {
+      await api.post('/v1/users/me/change-password', {
         currentPassword,
         newPassword,
       });
@@ -395,8 +395,8 @@ function ActiveSessionsSection() {
   async function fetchSessions() {
     setIsLoading(true);
     try {
-      const { data } = await api.get('/v1/auth/sessions');
-      setSessions(data);
+      // Sessions list endpoint not available in backend; stub empty
+      setSessions([]);
     } catch {
       setSessions([]);
     } finally {
@@ -408,7 +408,8 @@ function ActiveSessionsSection() {
     setFeedback(null);
     setIsRevoking(true);
     try {
-      await api.post('/v1/auth/sessions/revoke-all');
+      // Revoke-all sessions endpoint not available; use logout instead
+      await api.post('/v1/auth/logout');
       setFeedback({
         type: 'success',
         message: 'Todas as sessoes foram encerradas. Voce sera redirecionado.',

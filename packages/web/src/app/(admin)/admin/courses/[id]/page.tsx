@@ -112,7 +112,7 @@ export default function AdminCourseEditPage() {
   const { data: course, isLoading: courseLoading } = useQuery<CourseDetail>({
     queryKey: ['admin', 'course', courseId],
     queryFn: async () => {
-      const res = await api.get(`/v1/admin/courses/${courseId}`);
+      const res = await api.get(`/v1/courses/${courseId}`);
       return res.data;
     },
     enabled: !isNew,
@@ -122,7 +122,7 @@ export default function AdminCourseEditPage() {
   const { data: categories } = useQuery<Category[]>({
     queryKey: ['admin', 'categories-list'],
     queryFn: async () => {
-      const res = await api.get('/v1/admin/categories');
+      const res = await api.get('/v1/categories');
       return res.data;
     },
   });
@@ -160,11 +160,11 @@ export default function AdminCourseEditPage() {
       if (coverFile) formData.append('cover', coverFile);
 
       if (isNew) {
-        await api.post('/v1/admin/courses', formData, {
+        await api.post('/v1/courses', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       } else {
-        await api.put(`/v1/admin/courses/${courseId}`, formData, {
+        await api.patch(`/v1/courses/${courseId}`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       }
@@ -184,9 +184,9 @@ export default function AdminCourseEditPage() {
   const saveModuleMut = useMutation({
     mutationFn: async ({ id, title: t }: { id: number | null; title: string }) => {
       if (id) {
-        await api.put(`/v1/admin/courses/${courseId}/modules/${id}`, { title: t });
+        await api.patch(`/v1/course-modules/${id}`, { title: t });
       } else {
-        await api.post(`/v1/admin/courses/${courseId}/modules`, { title: t });
+        await api.post('/v1/course-modules', { title: t, courseId: Number(courseId) });
       }
     },
     onSuccess: () => {
@@ -198,7 +198,7 @@ export default function AdminCourseEditPage() {
   // Delete module
   const deleteModuleMut = useMutation({
     mutationFn: async (moduleId: number) => {
-      await api.delete(`/v1/admin/courses/${courseId}/modules/${moduleId}`);
+      await api.delete(`/v1/course-modules/${moduleId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'course', courseId] });
@@ -210,14 +210,15 @@ export default function AdminCourseEditPage() {
   const saveLessonMut = useMutation({
     mutationFn: async (data: { moduleId: number; id: number | null; title: string; youtubeUrl: string }) => {
       if (data.id) {
-        await api.put(`/v1/admin/courses/${courseId}/modules/${data.moduleId}/lessons/${data.id}`, {
+        await api.patch(`/v1/lessons/${data.id}`, {
           title: data.title,
           youtubeUrl: data.youtubeUrl,
         });
       } else {
-        await api.post(`/v1/admin/courses/${courseId}/modules/${data.moduleId}/lessons`, {
+        await api.post('/v1/lessons', {
           title: data.title,
           youtubeUrl: data.youtubeUrl,
+          moduleId: data.moduleId,
         });
       }
     },
@@ -230,7 +231,7 @@ export default function AdminCourseEditPage() {
   // Delete lesson
   const deleteLessonMut = useMutation({
     mutationFn: async ({ moduleId, lessonId }: { moduleId: number; lessonId: number }) => {
-      await api.delete(`/v1/admin/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`);
+      await api.delete(`/v1/lessons/${lessonId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'course', courseId] });
@@ -241,7 +242,7 @@ export default function AdminCourseEditPage() {
   // Grant/revoke student access
   const grantAccessMut = useMutation({
     mutationFn: async (email: string) => {
-      await api.post(`/v1/admin/courses/${courseId}/students`, { email });
+      await api.post('/v1/course-access/grant', { email, courseId: Number(courseId) });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'course', courseId] });
@@ -251,7 +252,7 @@ export default function AdminCourseEditPage() {
 
   const revokeAccessMut = useMutation({
     mutationFn: async (userId: number) => {
-      await api.delete(`/v1/admin/courses/${courseId}/students/${userId}`);
+      await api.delete('/v1/course-access/revoke', { data: { userId, courseId: Number(courseId) } });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'course', courseId] });

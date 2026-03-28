@@ -105,6 +105,11 @@ export class EnvironmentVariables {
   @IsOptional()
   LICENSE_KEY: string = '';
 
+  // App URL
+  @IsString()
+  @IsOptional()
+  APP_URL: string = 'http://localhost';
+
   // CORS
   @IsString()
   @IsOptional()

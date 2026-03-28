@@ -42,7 +42,7 @@ export default function AdminCategoriesPage() {
   const { data: categories, isLoading } = useQuery<Category[]>({
     queryKey: ['admin', 'categories'],
     queryFn: async () => {
-      const res = await api.get('/v1/admin/categories');
+      const res = await api.get('/v1/categories');
       return res.data;
     },
   });
@@ -50,9 +50,9 @@ export default function AdminCategoriesPage() {
   const saveMut = useMutation({
     mutationFn: async ({ id, name }: { id: number | null; name: string }) => {
       if (id) {
-        await api.put(`/v1/admin/categories/${id}`, { name });
+        await api.patch(`/v1/categories/${id}`, { name });
       } else {
-        await api.post('/v1/admin/categories', { name });
+        await api.post('/v1/categories', { name });
       }
     },
     onSuccess: () => {
@@ -63,7 +63,7 @@ export default function AdminCategoriesPage() {
 
   const deleteMut = useMutation({
     mutationFn: async (id: number) => {
-      await api.delete(`/v1/admin/categories/${id}`);
+      await api.delete(`/v1/categories/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] });
@@ -73,7 +73,7 @@ export default function AdminCategoriesPage() {
 
   const reorderMut = useMutation({
     mutationFn: async ({ id, direction }: { id: number; direction: 'up' | 'down' }) => {
-      await api.patch(`/v1/admin/categories/${id}/reorder`, { direction });
+      await api.patch('/v1/categories/reorder', { categoryIds: [id], direction });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] });
