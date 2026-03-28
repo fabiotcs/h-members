@@ -21,19 +21,25 @@ RUN npm ci --production=false
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy dependencies from stage 1
+# Copy dependencies from stage 1 (npm workspaces hoists to root node_modules)
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
-COPY --from=deps /app/packages/api/node_modules ./packages/api/node_modules
-COPY --from=deps /app/packages/web/node_modules ./packages/web/node_modules
+COPY --from=deps /app/package-lock.json ./
+
+# Copy workspace package.json files first (for npm workspace resolution)
+COPY package.json ./
+COPY packages/api/package.json ./packages/api/
+COPY packages/web/package.json ./packages/web/
+COPY packages/shared/package.json ./packages/shared/
 
 # Copy all source code
-COPY . .
+COPY packages/ ./packages/
+COPY tsconfig.base.json tsconfig.json ./
 
 # Build shared first (dependency of api and web)
 RUN npm run build -w @h-members/shared
 
-# Build API
+# Generate Prisma Client and build API
+RUN npx prisma generate --schema=packages/api/prisma/schema.prisma
 RUN npm run build -w @h-members/api
 
 # Build Web (pass build-time env vars for Next.js)
@@ -53,7 +59,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 # Install Nginx and supervisord
-RUN apk add --no-cache nginx supervisor mysql-client
+RUN apk add --no-cache nginx supervisor
 
 # Copy built artifacts — shared
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
@@ -65,7 +71,8 @@ COPY --from=builder /app/packages/api/package.json ./packages/api/
 COPY --from=builder /app/packages/api/prisma ./packages/api/prisma
 
 # Copy built artifacts — Web (Next.js standalone output)
-COPY --from=builder /app/packages/web/.next/standalone ./packages/web/
+# Standalone output mirrors the monorepo structure inside .next/standalone/
+COPY --from=builder /app/packages/web/.next/standalone ./
 COPY --from=builder /app/packages/web/.next/static ./packages/web/.next/static
 COPY --from=builder /app/packages/web/public ./packages/web/public
 
