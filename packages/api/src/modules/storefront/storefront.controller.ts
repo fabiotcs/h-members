@@ -16,7 +16,7 @@ import { StorefrontCourseDto } from './dto/storefront-response.dto';
  * Ref: FR-045, FR-046, FR-047
  */
 @ApiTags('storefront')
-@Controller('api/v1/storefront')
+@Controller('v1/storefront')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class StorefrontController {

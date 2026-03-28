@@ -23,14 +23,14 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
-  @Get('api/v1/settings')
+  @Get('v1/settings')
   @ApiOperation({ summary: 'Obter todas as configuracoes white-label (publico)' })
   @ApiResponse({ status: 200, description: 'Configuracoes da plataforma' })
   async getAll(): Promise<Record<string, string>> {
     return this.settingsService.getAll();
   }
 
-  @Put('api/v1/admin/settings')
+  @Put('v1/admin/settings')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
@@ -43,7 +43,7 @@ export class SettingsController {
     return { success: true };
   }
 
-  @Put('api/v1/admin/settings/bulk')
+  @Put('v1/admin/settings/bulk')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()

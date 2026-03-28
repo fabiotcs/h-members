@@ -33,7 +33,7 @@ import {
 } from '../dto';
 
 @ApiTags('admin/webhooks')
-@Controller('api/v1/admin/webhooks')
+@Controller('v1/admin/webhooks')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)
 @ApiBearerAuth()

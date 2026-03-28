@@ -35,7 +35,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 
 @ApiTags('courses')
-@Controller('api/v1/courses')
+@Controller('v1/courses')
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 

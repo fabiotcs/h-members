@@ -33,7 +33,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('course-access')
-@Controller('api/v1/course-access')
+@Controller('v1/course-access')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class CourseAccessController {

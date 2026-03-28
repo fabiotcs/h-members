@@ -25,7 +25,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 
 @ApiTags('lessons')
 @ApiBearerAuth()
-@Controller('api/v1/lessons')
+@Controller('v1/lessons')
 @UseGuards(RolesGuard)
 export class LessonsController {
   constructor(private readonly lessonsService: LessonsService) {}

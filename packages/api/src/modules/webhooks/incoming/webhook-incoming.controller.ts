@@ -13,7 +13,7 @@ import { Request } from 'express';
 import { WebhookIncomingService } from './webhook-incoming.service';
 
 @ApiTags('webhooks')
-@Controller('api/v1/webhooks')
+@Controller('v1/webhooks')
 export class WebhookIncomingController {
   constructor(private readonly incomingService: WebhookIncomingService) {}
 

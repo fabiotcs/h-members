@@ -19,7 +19,7 @@ import {
 
 @ApiTags('Admin - Login Logs')
 @ApiBearerAuth()
-@Controller('api/v1/admin/login-logs')
+@Controller('v1/admin/login-logs')
 @UseGuards(RolesGuard)
 @Roles(UserRole.ADMIN)
 export class LoginLogsController {

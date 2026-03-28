@@ -29,7 +29,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('progress')
 @ApiBearerAuth()
-@Controller('api/v1/progress')
+@Controller('v1/progress')
 @UseGuards(JwtAuthGuard)
 export class ProgressController {
   constructor(private readonly progressService: ProgressService) {}
