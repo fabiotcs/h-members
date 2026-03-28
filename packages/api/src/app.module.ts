@@ -19,6 +19,7 @@ import { LoginLogsModule } from './modules/login-logs';
 import { SessionsModule } from './modules/sessions';
 import { AdminModule } from './modules/admin';
 import { EmailModule } from './modules/email';
+import { PaymentsModule } from './modules/payments';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
@@ -49,6 +50,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     LoginLogsModule,
     SessionsModule,
     EmailModule,
+    PaymentsModule,
     AdminModule,
   ],
   controllers: [],

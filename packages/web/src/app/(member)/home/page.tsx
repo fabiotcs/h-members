@@ -20,6 +20,7 @@ interface StorefrontCourse {
   description: string;
   coverImage: string;
   salesUrl: string;
+  priceInCents?: number;
   category: { id: number; name: string; slug: string } | null;
   hasAccess: boolean;
   progress: {
@@ -46,6 +47,7 @@ interface MappedCourse {
   isLocked: boolean;
   isNew: boolean;
   href?: string;
+  price?: number;
 }
 
 /* ------------------------------------------------------------------ */
@@ -65,6 +67,7 @@ function mapCourse(c: StorefrontCourse): MappedCourse {
     isNew: c.isNew,
     // Locked courses open sales URL in new tab; accessible ones go to detail
     href: isLocked ? undefined : `/courses/${c.id}`,
+    price: c.priceInCents,
   };
 }
 

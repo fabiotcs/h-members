@@ -7,6 +7,13 @@ import { Lock, Play } from 'lucide-react';
 import { ProgressBar } from './progress-bar';
 import { Badge } from './badge';
 
+function formatPriceBRL(cents: number): string {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(cents / 100);
+}
+
 interface CourseCardProps {
   id: number;
   title: string;
@@ -16,6 +23,7 @@ interface CourseCardProps {
   isLocked?: boolean;
   isNew?: boolean;
   href?: string;
+  price?: number;
 }
 
 export function CourseCard({
@@ -27,6 +35,7 @@ export function CourseCard({
   isLocked = false,
   isNew = false,
   href,
+  price,
 }: CourseCardProps) {
   const link = href || `/courses/${id}`;
 
@@ -78,7 +87,11 @@ export function CourseCard({
         {/* Badges */}
         <div className="absolute left-2 top-2 flex gap-1.5">
           {isNew && <Badge variant="default">Novo</Badge>}
-          {isLocked && <Badge variant="lock">Adquirir</Badge>}
+          {isLocked && (
+            <Badge variant="lock">
+              {price != null && price > 0 ? formatPriceBRL(price) : 'Adquirir'}
+            </Badge>
+          )}
         </div>
 
         {/* Title and description at bottom */}

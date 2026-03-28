@@ -22,6 +22,12 @@ export class CreateCourseDto {
   @IsOptional()
   salesUrl?: string;
 
+  @ApiPropertyOptional({ example: 9900, description: 'Preco em centavos (ex: 9900 = R$ 99,00)' })
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  priceInCents?: number;
+
   @ApiPropertyOptional({ enum: CourseStatus, default: CourseStatus.DRAFT })
   @IsEnum(CourseStatus)
   @IsOptional()

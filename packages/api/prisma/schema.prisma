@@ -160,8 +160,9 @@ model Course {
   title       String       @db.VarChar(255)
   description String?      @db.Text
   coverImage  String?      @map("cover_image") @db.VarChar(512)
-  salesUrl    String?      @map("sales_url") @db.VarChar(512)
-  status      CourseStatus @default(DRAFT)
+  salesUrl      String?      @map("sales_url") @db.VarChar(512)
+  priceInCents  Int?         @default(0) @map("price_in_cents")
+  status        CourseStatus @default(DRAFT)
   order       Int          @default(0)
   categoryId  Int?         @map("category_id")
   createdAt   DateTime     @default(now()) @map("created_at")

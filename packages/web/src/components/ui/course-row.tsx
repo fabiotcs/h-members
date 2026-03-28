@@ -13,6 +13,7 @@ interface Course {
   progress?: number;
   isLocked?: boolean;
   isNew?: boolean;
+  price?: number;
 }
 
 interface CourseRowProps {

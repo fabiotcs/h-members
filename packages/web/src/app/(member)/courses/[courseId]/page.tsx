@@ -12,6 +12,8 @@ import {
   Lock,
   ExternalLink,
   ArrowLeft,
+  ShoppingCart,
+  Loader2,
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { useCourseProgress } from '@/hooks/use-progress';
@@ -41,9 +43,18 @@ interface CourseDetail {
   description?: string;
   thumbnailUrl?: string;
   salesUrl?: string;
+  priceInCents?: number;
   status: string;
   modules: CourseModuleItem[];
   hasAccess: boolean;
+}
+
+interface PaymentConfig {
+  activeGateway: string;
+}
+
+interface CheckoutResponse {
+  checkoutUrl: string;
 }
 
 // ---- API ----
@@ -51,6 +62,23 @@ interface CourseDetail {
 async function fetchCourse(courseId: string): Promise<CourseDetail> {
   const { data } = await api.get(`/v1/courses/${courseId}`);
   return data.data;
+}
+
+async function fetchPaymentConfig(): Promise<PaymentConfig> {
+  const { data } = await api.get('/v1/payments/config');
+  return data;
+}
+
+async function createCheckout(courseId: string): Promise<CheckoutResponse> {
+  const { data } = await api.post(`/v1/payments/checkout/${courseId}`);
+  return data;
+}
+
+function formatPriceBRL(cents: number): string {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(cents / 100);
 }
 
 // ---- Helpers ----
@@ -285,6 +313,14 @@ export default function CourseDetailPage() {
   const { data: progress, isLoading: isProgressLoading } =
     useCourseProgress(courseId);
 
+  const { data: paymentConfig } = useQuery({
+    queryKey: ['payment-config'],
+    queryFn: fetchPaymentConfig,
+    staleTime: 5 * 60 * 1000, // cache for 5 min
+  });
+
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+
   // Build set of completed lesson IDs for quick lookup
   const completedLessonIds = useMemo(() => {
     if (!progress?.lessons) return new Set<string>();
@@ -313,6 +349,27 @@ export default function CourseDetailPage() {
       window.open(course.salesUrl, '_blank', 'noopener,noreferrer');
     }
   };
+
+  const handleBuy = async () => {
+    if (!course) return;
+    setIsCheckoutLoading(true);
+    try {
+      const { checkoutUrl } = await createCheckout(course.id);
+      window.location.href = checkoutUrl;
+    } catch {
+      // Fallback to sales URL if checkout fails
+      if (course.salesUrl) {
+        window.open(course.salesUrl, '_blank', 'noopener,noreferrer');
+      }
+      setIsCheckoutLoading(false);
+    }
+  };
+
+  const useIntegratedCheckout =
+    paymentConfig?.activeGateway &&
+    paymentConfig.activeGateway !== 'none' &&
+    course?.priceInCents != null &&
+    course.priceInCents > 0;
 
   if (isLoading || isProgressLoading) {
     return <CourseDetailSkeleton />;
@@ -400,6 +457,11 @@ export default function CourseDetailPage() {
                   : `${durationMinutes}min`}
               </span>
             )}
+            {!course.hasAccess && course.priceInCents != null && course.priceInCents > 0 && (
+              <span className="font-semibold text-[var(--color-success)]">
+                {formatPriceBRL(course.priceInCents)}
+              </span>
+            )}
           </div>
 
           {course.description && (
@@ -430,6 +492,21 @@ export default function CourseDetailPage() {
                 {progress && progress.percentage > 0
                   ? 'Continuar assistindo'
                   : 'Comecar a assistir'}
+              </button>
+            ) : useIntegratedCheckout ? (
+              <button
+                onClick={handleBuy}
+                disabled={isCheckoutLoading}
+                className="flex items-center gap-2.5 rounded-lg bg-[var(--color-success)] px-6 py-3 text-sm font-semibold text-white transition-all hover:brightness-110 disabled:opacity-60"
+              >
+                {isCheckoutLoading ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <ShoppingCart size={18} />
+                )}
+                {isCheckoutLoading
+                  ? 'Redirecionando...'
+                  : `Comprar por ${formatPriceBRL(course!.priceInCents!)}`}
               </button>
             ) : (
               <button

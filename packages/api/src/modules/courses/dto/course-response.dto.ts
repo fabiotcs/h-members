@@ -28,6 +28,9 @@ export class CourseResponseDto {
   @ApiPropertyOptional({ example: 'https://hotmart.com/produto/123' })
   salesUrl: string | null;
 
+  @ApiPropertyOptional({ example: 9900, description: 'Preco em centavos (ex: 9900 = R$ 99,00)' })
+  priceInCents: number | null;
+
   @ApiProperty({ enum: CourseStatus, example: CourseStatus.DRAFT })
   status: CourseStatus;
 

@@ -66,6 +66,29 @@ export class AppConfigService {
     };
   }
 
+  get payments() {
+    return {
+      gateway: this.config.get<string>('PAYMENT_GATEWAY', 'none'), // 'stripe' | 'mercadopago' | 'none'
+      stripe: {
+        secretKey: this.config.get<string>('STRIPE_SECRET_KEY', ''),
+        publishableKey: this.config.get<string>('STRIPE_PUBLISHABLE_KEY', ''),
+        webhookSecret: this.config.get<string>('STRIPE_WEBHOOK_SECRET', ''),
+      },
+      mercadoPago: {
+        accessToken: this.config.get<string>('MP_ACCESS_TOKEN', ''),
+        publicKey: this.config.get<string>('MP_PUBLIC_KEY', ''),
+        webhookSecret: this.config.get<string>('MP_WEBHOOK_SECRET', ''),
+      },
+      asaas: {
+        apiKey: this.config.get<string>('ASAAS_API_KEY', ''),
+        webhookToken: this.config.get<string>('ASAAS_WEBHOOK_TOKEN', ''),
+        sandbox: this.config.get<string>('ASAAS_SANDBOX', 'true') === 'true',
+      },
+      successUrl: this.config.get<string>('PAYMENT_SUCCESS_URL', ''),
+      cancelUrl: this.config.get<string>('PAYMENT_CANCEL_URL', ''),
+    };
+  }
+
   /** Whether SMTP is fully configured and email sending is available. */
   get isMailConfigured(): boolean {
     const { host, user, pass, from } = this.mail;

@@ -109,6 +109,55 @@ export class EnvironmentVariables {
   @IsString()
   @IsOptional()
   CORS_ORIGIN: string = 'http://localhost:3000';
+
+  // Payment Gateway (optional — system starts without payments configured)
+  @IsString()
+  @IsOptional()
+  PAYMENT_GATEWAY: string = 'none';
+
+  @IsString()
+  @IsOptional()
+  STRIPE_SECRET_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  STRIPE_PUBLISHABLE_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  STRIPE_WEBHOOK_SECRET?: string;
+
+  @IsString()
+  @IsOptional()
+  MP_ACCESS_TOKEN?: string;
+
+  @IsString()
+  @IsOptional()
+  MP_PUBLIC_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  MP_WEBHOOK_SECRET?: string;
+
+  @IsString()
+  @IsOptional()
+  ASAAS_API_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  ASAAS_WEBHOOK_TOKEN?: string;
+
+  @IsString()
+  @IsOptional()
+  ASAAS_SANDBOX: string = 'true';
+
+  @IsString()
+  @IsOptional()
+  PAYMENT_SUCCESS_URL: string = '';
+
+  @IsString()
+  @IsOptional()
+  PAYMENT_CANCEL_URL: string = '';
 }
 
 export function validate(

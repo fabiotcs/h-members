@@ -8,7 +8,9 @@ import { AppModule } from './app.module';
 import { AppConfigService } from './config';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true, // Required for Stripe webhook signature verification
+  });
   const logger = new Logger('Bootstrap');
 
   const appConfig = app.get(AppConfigService);

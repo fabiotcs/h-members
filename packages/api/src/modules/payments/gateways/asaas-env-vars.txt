@@ -1,0 +1,44 @@
+# =============================================================================
+# Asaas Gateway — Integration Checklist
+# =============================================================================
+# This file documents the changes needed in other files to fully wire up the
+# Asaas gateway. Another agent owns those files, so these are instructions
+# for them to follow.
+# =============================================================================
+
+# 1. Add to .env.example under Payment section:
+# -----------------------------------------------
+ASAAS_API_KEY=
+ASAAS_WEBHOOK_TOKEN=
+ASAAS_SANDBOX=true
+
+# 2. Add to AppConfigService payments getter (config.service.ts):
+# ----------------------------------------------------------------
+# Inside the `get payments()` return object, add:
+#
+# asaas: {
+#   apiKey: this.config.get<string>('ASAAS_API_KEY', ''),
+#   webhookToken: this.config.get<string>('ASAAS_WEBHOOK_TOKEN', ''),
+#   sandbox: this.config.get<string>('ASAAS_SANDBOX', 'true') === 'true',
+# },
+
+# 3. Add to PaymentsService constructor:
+# ----------------------------------------
+# if (config.payments.asaas.apiKey) {
+#   this.gateways.set('asaas', asaasGw);
+# }
+
+# 4. Add to PaymentsController:
+# -------------------------------
+# @Post('webhook/asaas')
+# async webhookAsaas(@Req() req, @Headers('asaas-access-token') token: string) {
+#   return this.paymentsService.handleWebhook('asaas', req.body, token);
+# }
+
+# 5. Add to payments.module.ts providers array:
+# -----------------------------------------------
+# AsaasGateway
+
+# 6. Update PAYMENT_GATEWAY env var comment everywhere:
+# -------------------------------------------------------
+# Payment Gateway (stripe | mercadopago | asaas | none)
