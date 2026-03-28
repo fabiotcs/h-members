@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build artifacts
+dist/
+**/dist/
+.next/
+**/.next/
+
+# Git
+.git/
+.gitignore
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Documentation
+docs/
+*.md
+LICENSE
+
+# IDE and editor configs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# AIOX framework and AI tooling
+.aiox-core/
+.aiox/
+.claude/
+.cursor/
+.codex/
+.gemini/
+.agent/
+.antigravity/
+
+# Docker (avoid recursive context)
+docker-compose*.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+coverage/
+.nyc_output/
+
+# Uploads (mounted as volume, not in image)
+uploads/
+
+# Squads
+squads/
+
+# Misc
+*.log
+npm-debug.log*

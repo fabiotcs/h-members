@@ -1,0 +1,339 @@
+// =============================================================================
+// H-Members — Prisma Schema
+// Plataforma de Area de Membros SaaS (Netflix-style)
+// Provider: MySQL / MariaDB
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum UserRole {
+  ADMIN
+  STUDENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum CourseStatus {
+  ACTIVE
+  INACTIVE
+  DRAFT
+}
+
+enum GrantedBy {
+  ADMIN
+  WEBHOOK
+}
+
+enum WebhookDirection {
+  IN
+  OUT
+}
+
+enum EmailType {
+  WELCOME
+  PASSWORD_RESET
+  CUSTOM
+}
+
+enum EmailStatus {
+  SENT
+  FAILED
+}
+
+// =============================================================================
+// USER & AUTHENTICATION
+// =============================================================================
+
+/// Usuario da plataforma (admin ou aluno).
+/// Ref: FR-010, FR-011, FR-065
+model User {
+  id           Int        @id @default(autoincrement())
+  name         String     @db.VarChar(255)
+  email        String     @unique @db.VarChar(255)
+  passwordHash String     @map("password_hash") @db.VarChar(255)
+  role         UserRole   @default(STUDENT)
+  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  // Relacoes
+  sessions            Session[]
+  courseAccesses       CourseAccess[]
+  lessonProgresses     LessonProgress[]
+  loginLogs            LoginLog[]
+  passwordResetTokens  PasswordResetToken[]
+
+  @@map("users")
+}
+
+/// Sessao JWT ativa. Bloqueio de sessoes simultaneas via MAX_SESSIONS.
+/// Ref: FR-008, FR-009, FR-012
+model Session {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  token     String   @db.VarChar(512)
+  ip        String?  @db.VarChar(45)
+  userAgent String?  @map("user_agent") @db.VarChar(512)
+  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime @map("expires_at")
+
+  // Relacoes
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_sessions_user_id")
+  @@index([token], map: "idx_sessions_token")
+  @@map("sessions")
+}
+
+/// Token de recuperacao de senha com expiracao de 1 hora.
+/// Ref: FR-013, FR-060
+model PasswordResetToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  token     String    @unique @db.VarChar(255)
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  // Relacoes
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_password_reset_tokens_user_id")
+  @@map("password_reset_tokens")
+}
+
+/// Log de tentativas de login para auditoria no painel admin.
+/// Ref: FR-014, FR-067
+model LoginLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  ip        String?  @db.VarChar(45)
+  userAgent String?  @map("user_agent") @db.VarChar(512)
+  success   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relacoes
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId], map: "idx_login_logs_user_id")
+  @@index([createdAt], map: "idx_login_logs_created_at")
+  @@map("login_logs")
+}
+
+// =============================================================================
+// CONTENT MANAGEMENT
+// =============================================================================
+
+/// Categoria para organizacao de cursos na vitrine.
+/// Ref: FR-037, FR-070
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  slug      String   @unique @db.VarChar(255)
+  order     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relacoes
+  courses Course[]
+
+  @@map("categories")
+}
+
+/// Curso da plataforma com status, ordenacao e URL de vendas.
+/// Ref: FR-016, FR-045, FR-046, FR-049
+model Course {
+  id          Int          @id @default(autoincrement())
+  title       String       @db.VarChar(255)
+  description String?      @db.Text
+  coverImage  String?      @map("cover_image") @db.VarChar(512)
+  salesUrl    String?      @map("sales_url") @db.VarChar(512)
+  status      CourseStatus @default(DRAFT)
+  order       Int          @default(0)
+  categoryId  Int?         @map("category_id")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  // Relacoes
+  category       Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  modules        CourseModule[]
+  courseAccesses  CourseAccess[]
+
+  @@index([categoryId], map: "idx_courses_category_id")
+  @@index([status], map: "idx_courses_status")
+  @@map("courses")
+}
+
+/// Modulo (secao) de um curso. Prisma reserva "Module", entao usamos "CourseModule".
+/// Ref: FR-017, FR-021
+model CourseModule {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  description String?  @db.Text
+  order       Int      @default(0)
+  courseId     Int      @map("course_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relacoes
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@index([courseId, order], map: "idx_course_modules_course_order")
+  @@map("course_modules")
+}
+
+/// Aula com video do YouTube e materiais de apoio.
+/// Ref: FR-018, FR-023, FR-029
+model Lesson {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  description String?  @db.Text
+  videoUrl    String?  @map("video_url") @db.VarChar(512)
+  duration    Int?     /// Duracao estimada em segundos
+  order       Int      @default(0)
+  moduleId    Int      @map("module_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relacoes
+  module            CourseModule     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  materials         Material[]
+  lessonProgresses  LessonProgress[]
+
+  @@index([moduleId, order], map: "idx_lessons_module_order")
+  @@map("lessons")
+}
+
+/// Arquivo de material de apoio (PDF, imagem, etc.) vinculado a uma aula.
+/// Ref: FR-018, FR-019, FR-020
+model Material {
+  id        Int      @id @default(autoincrement())
+  filename  String   @db.VarChar(255)
+  filepath  String   @db.VarChar(512)
+  mimetype  String   @db.VarChar(127)
+  size      Int      /// Tamanho em bytes
+  lessonId  Int      @map("lesson_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relacoes
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId], map: "idx_materials_lesson_id")
+  @@map("materials")
+}
+
+// =============================================================================
+// ACCESS & PROGRESS
+// =============================================================================
+
+/// Vinculo de acesso de um usuario a um curso (concedido por admin ou webhook).
+/// Ref: FR-051, FR-066
+model CourseAccess {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  courseId   Int       @map("course_id")
+  grantedAt DateTime  @default(now()) @map("granted_at")
+  grantedBy GrantedBy @default(ADMIN) @map("granted_by")
+
+  // Relacoes
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId], map: "uq_course_access_user_course")
+  @@map("course_accesses")
+}
+
+/// Progresso do aluno em uma aula, incluindo posicao do video para resume playback.
+/// Ref: FR-039, FR-040, FR-041, FR-029
+model LessonProgress {
+  id            Int       @id @default(autoincrement())
+  userId        Int       @map("user_id")
+  lessonId      Int       @map("lesson_id")
+  completed     Boolean   @default(false)
+  completedAt   DateTime? @map("completed_at")
+  videoPosition Int       @default(0) @map("video_position") /// Posicao em segundos para resume playback
+
+  // Relacoes
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId], map: "uq_lesson_progress_user_lesson")
+  @@map("lesson_progresses")
+}
+
+// =============================================================================
+// WEBHOOKS
+// =============================================================================
+
+/// Configuracao de webhook de saida (URL destino, eventos assinados).
+/// Ref: FR-054, FR-055, FR-071
+model WebhookConfig {
+  id        Int      @id @default(autoincrement())
+  url       String   @db.VarChar(512)
+  events    Json     /// Lista de eventos assinados, ex: ["user.registered", "course.completed"]
+  active    Boolean  @default(true)
+  secret    String?  @db.VarChar(255) /// Secret para HMAC signature
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("webhook_configs")
+}
+
+/// Log de webhooks recebidos (IN) e enviados (OUT).
+/// Ref: FR-057, FR-072
+model WebhookLog {
+  id         Int              @id @default(autoincrement())
+  direction  WebhookDirection
+  event      String           @db.VarChar(100)
+  payload    Json?            /// Payload completo do webhook
+  statusCode Int?             @map("status_code")
+  attempts   Int              @default(1)
+  response   String?          @db.Text /// Resposta do servidor destino
+  createdAt  DateTime         @default(now()) @map("created_at")
+
+  @@index([direction, createdAt], map: "idx_webhook_logs_direction_created")
+  @@map("webhook_logs")
+}
+
+// =============================================================================
+// EMAIL & PLATFORM
+// =============================================================================
+
+/// Log de e-mails transacionais enviados pela plataforma.
+/// Ref: FR-063
+model EmailLog {
+  id        Int         @id @default(autoincrement())
+  to        String      @db.VarChar(255)
+  type      EmailType
+  status    EmailStatus
+  error     String?     @db.Text
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  @@map("email_logs")
+}
+
+/// Configuracoes white-label persistidas no banco de dados.
+/// Ref: FR-073, FR-075, FR-076, FR-077
+model PlatformSetting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(100)
+  value     String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("platform_settings")
+}

@@ -1,0 +1,16 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js",
+  "/(admin)/admin/categories/page": "app/(admin)/admin/categories/page.js",
+  "/(admin)/admin/logs/page": "app/(admin)/admin/logs/page.js",
+  "/(admin)/admin/courses/[id]/page": "app/(admin)/admin/courses/[id]/page.js",
+  "/(admin)/admin/page": "app/(admin)/admin/page.js",
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(admin)/admin/courses/page": "app/(admin)/admin/courses/page.js",
+  "/(member)/courses/[courseId]/page": "app/(member)/courses/[courseId]/page.js",
+  "/(member)/courses/[courseId]/lessons/[lessonId]/page": "app/(member)/courses/[courseId]/lessons/[lessonId]/page.js",
+  "/(admin)/admin/users/[id]/page": "app/(admin)/admin/users/[id]/page.js",
+  "/(admin)/admin/users/page": "app/(admin)/admin/users/page.js",
+  "/(admin)/admin/webhooks/page": "app/(admin)/admin/webhooks/page.js",
+  "/(admin)/admin/settings/page": "app/(admin)/admin/settings/page.js"
+}
