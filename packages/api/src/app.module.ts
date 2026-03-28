@@ -14,12 +14,19 @@ import { ProgressModule } from './modules/progress';
 import { CourseAccessModule } from './modules/course-access';
 import { StorefrontModule } from './modules/storefront';
 import { WebhooksModule } from './modules/webhooks';
+import { CategoriesModule } from './modules/categories';
+import { LoginLogsModule } from './modules/login-logs';
+import { SessionsModule } from './modules/sessions';
+import { AdminModule } from './modules/admin';
+import { EmailModule } from './modules/email';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     // ConfigModule with env validation — must be first
     AppConfigModule,
     PrismaModule,
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -33,11 +40,16 @@ import { WebhooksModule } from './modules/webhooks';
     CoursesModule,
     CourseModulesModule,
     LessonsModule,
+    CategoriesModule,
     UploadModule,
     ProgressModule,
     CourseAccessModule,
     StorefrontModule,
     WebhooksModule,
+    LoginLogsModule,
+    SessionsModule,
+    EmailModule,
+    AdminModule,
   ],
   controllers: [],
   providers: [],
