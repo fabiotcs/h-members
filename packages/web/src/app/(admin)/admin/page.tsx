@@ -7,37 +7,31 @@ import {
   BookOpen,
   CheckCircle,
   LogIn,
-  TrendingUp,
   Activity,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { StatCard } from '@/components/admin/stat-card';
 
 interface DashboardData {
-  totalUsers: number;
-  usersGrowth: number;
-  totalCourses: { active: number; draft: number; inactive: number; total: number };
+  users: { total: number; active: number };
+  courses: { total: number; active: number; draft: number };
   lessonsCompleted30d: number;
-  lessonsCompletedGrowth: number;
   logins7d: number;
-  loginsGrowth: number;
-  recentActivity: {
+  recentUsers: {
     id: number;
-    type: string;
-    description: string;
-    timestamp: string;
+    name: string;
+    email: string;
+    role: string;
+    createdAt: string;
   }[];
 }
 
 const fallbackData: DashboardData = {
-  totalUsers: 0,
-  usersGrowth: 0,
-  totalCourses: { active: 0, draft: 0, inactive: 0, total: 0 },
+  users: { total: 0, active: 0 },
+  courses: { total: 0, active: 0, draft: 0 },
   lessonsCompleted30d: 0,
-  lessonsCompletedGrowth: 0,
   logins7d: 0,
-  loginsGrowth: 0,
-  recentActivity: [],
+  recentUsers: [],
 };
 
 export default function AdminDashboardPage() {
@@ -68,36 +62,32 @@ export default function AdminDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Total de Usuarios"
-          value={stats.totalUsers.toLocaleString('pt-BR')}
+          value={stats.users.total}
           icon={Users}
-          trend={{ value: stats.usersGrowth, label: 'vs. mes anterior' }}
         />
         <StatCard
           title="Total de Cursos"
-          value={stats.totalCourses.total}
+          value={stats.courses.total}
           icon={BookOpen}
-          subtitle={`${stats.totalCourses.active} ativos / ${stats.totalCourses.draft} rascunho / ${stats.totalCourses.inactive} inativos`}
         />
         <StatCard
           title="Aulas Concluidas"
-          value={stats.lessonsCompleted30d.toLocaleString('pt-BR')}
+          value={stats.lessonsCompleted30d}
           icon={CheckCircle}
-          trend={{ value: stats.lessonsCompletedGrowth, label: 'ultimos 30 dias' }}
         />
         <StatCard
-          title="Logins"
-          value={stats.logins7d.toLocaleString('pt-BR')}
+          title="Logins (7 dias)"
+          value={stats.logins7d}
           icon={LogIn}
-          trend={{ value: stats.loginsGrowth, label: 'ultimos 7 dias' }}
         />
       </div>
 
-      {/* Recent activity */}
+      {/* Recent users */}
       <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]">
         <div className="flex items-center gap-2 border-b border-[var(--color-border)] px-5 py-4">
           <Activity size={18} className="text-[var(--color-primary-light)]" />
           <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
-            Atividade Recente
+            Usuarios Recentes
           </h2>
         </div>
         <div className="divide-y divide-[var(--color-border)]">
@@ -109,29 +99,47 @@ export default function AdminDashboardPage() {
                 <div className="ml-auto h-3 w-24 animate-pulse rounded bg-[var(--color-bg-elevated)]" />
               </div>
             ))
-          ) : stats.recentActivity.length > 0 ? (
-            stats.recentActivity.map((item, idx) => (
+          ) : stats.recentUsers.length > 0 ? (
+            stats.recentUsers.map((user, idx) => (
               <motion.div
-                key={item.id}
+                key={user.id}
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.05 }}
                 className="flex items-center justify-between px-5 py-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="h-2 w-2 rounded-full bg-[var(--color-primary)]" />
-                  <span className="text-sm text-[var(--color-text-secondary)]">
-                    {item.description}
-                  </span>
+                  <div
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white"
+                    style={{ backgroundColor: 'var(--color-primary)' }}
+                  >
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-[var(--color-text-primary)]">
+                      {user.name}
+                    </p>
+                    <p className="text-xs text-[var(--color-text-muted)]">
+                      {user.email}
+                    </p>
+                  </div>
                 </div>
-                <span className="shrink-0 text-xs text-[var(--color-text-muted)]">
-                  {new Date(item.timestamp).toLocaleString('pt-BR')}
-                </span>
+                <div className="text-right">
+                  <span className="inline-block rounded-full px-2 py-0.5 text-xs font-medium" style={{
+                    backgroundColor: user.role === 'ADMIN' ? 'var(--color-primary)' : 'var(--color-bg-elevated)',
+                    color: user.role === 'ADMIN' ? 'white' : 'var(--color-text-secondary)',
+                  }}>
+                    {user.role === 'ADMIN' ? 'Admin' : 'Aluno'}
+                  </span>
+                  <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                    {new Date(user.createdAt).toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
               </motion.div>
             ))
           ) : (
             <div className="px-5 py-8 text-center text-sm text-[var(--color-text-muted)]">
-              Nenhuma atividade recente
+              Nenhum usuario cadastrado
             </div>
           )}
         </div>
